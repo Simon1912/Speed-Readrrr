@@ -1,0 +1,1 @@
+{\n  "name": "Speed Readrrr",\n  "short_name": "SpeedRead",\n  "start_url": ".",\n  "display": "standalone",\n  "background_color": "#FFFFFF",\n  "theme_color": "#000000",\n  "icons": [{\n    "src": "icon.png",\n    "sizes": "192x192",\n    "type": "image/png"\n  }, {\n    "src": "icon.svg",\n    "sizes": "any",\n    "type": "image/svg+xml"\n  }]\n}
