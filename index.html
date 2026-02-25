@@ -1,1 +1,53 @@
-<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <meta name="theme-color" content="#317EFB">\n    <link rel="manifest" href="manifest.json">\n    <link rel="apple-touch-icon" href="icons/icon-192x192.png">\n    <title>Speed Reading App</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            background-color: #f4f4f4;\n            display: flex;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n            margin: 0;\n        }\n        .container {\n            text-align: center;\n        }\n        h1 {\n            color: #333;\n        }\n    </style>\n</head>\n<body>\n    <div class="container">\n        <h1>Welcome to the Speed Reading App</h1>\n        <p>Enhance your reading speed and comprehension with our app!</p>\n    </div>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Reader</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #display { font-size: 2em; margin: 20px 0; }
+        #controls { margin: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Speed Reader</h1>
+    <textarea id="input" rows="10" cols="50" placeholder="Enter text here..."></textarea><br>
+    <div id="display">Your speed reading text will appear here.</div>
+    <div id="controls">
+        <button id="play">Play</button>
+        <button id="pause">Pause</button>
+        <label for="speed">Speed (words per minute): </label>
+        <input type="number" id="speed" value="200" min="50" max="1000">
+    </div>
+
+    <script>
+        let timer;
+        let index = 0;
+        let words = [];
+        const display = document.getElementById('display');
+
+        document.getElementById('input').addEventListener('input', function() {
+            words = this.value.trim().split(/\s+/);
+            index = 0;
+            display.textContent = words.length ? words[index] : '';
+        });
+
+        document.getElementById('play').addEventListener('click', function() {
+            const speed = parseInt(document.getElementById('speed').value) || 200;
+            clearInterval(timer);
+            timer = setInterval(() => {
+                if (index < words.length) {
+                    display.textContent = words[index++];
+                } else {
+                    clearInterval(timer);
+                }
+            }, (60000 / speed));
+        });
+
+        document.getElementById('pause').addEventListener('click', function() {
+            clearInterval(timer);
+        });
+    </script>
+</body>
+</html>
