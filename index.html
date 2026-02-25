@@ -5,54 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speed Reading Interface</title>
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f3f4f6;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            text-align: center;
-        }
-        .word {
-            font-size: 3em;
-            line-height: 1.5;
-            margin: 20px;
-        }
-        .input-area {
-            margin-top: 50px;
-        }
-        .input-area input {
-            padding: 10px;
-            font-size: 1.2em;
-            width: 300px;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .input-area input:focus {
-            border-color: #4A90E2;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 1.2em;
-            margin-left: 10px;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-            background-color: #4A90E2;
-            color: white;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #357ABD;
-        }
-    </style>
-</head>
 <body>
+  <div class="container">
+    <div id="word" class="word">Ready</div>
+
+    <div class="row small">
+      <span>WPM: <span id="wpmLabel">300</span></span>
+      <input id="wpm" type="range" min="120" max="900" step="10" />
+      <span id="pos">0 / 0</span>
+    </div>
+
+    <div class="row">
+      <button id="prevBtn">⟵</button>
+      <button id="playBtn">▶ Start</button>
+      <button id="nextBtn">⟶</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+
+    <div class="input-area">
+      <textarea id="textInput" placeholder="Paste text here..."></textarea>
+      <div class="row">
+        <button id="loadBtn">Load Text</button>
+        <button id="clearBtn">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
     <div class="container">
         <div id="word" class="word"></div>
         <div class="input-area">
