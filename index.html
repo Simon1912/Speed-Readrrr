@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speed Reading Interface</title>
-    <style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speed Reading Interface</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
 <body>
   <div class="container">
     <div id="word" class="word">Ready</div>
@@ -33,42 +34,5 @@
   </div>
 
   <script src="app.js"></script>
-</body>
-    <div class="container">
-        <div id="word" class="word"></div>
-        <div class="input-area">
-            <input type="text" id="textInput" placeholder="Enter text here..." />
-            <button onclick="startReading()">Start</button>
-        </div>
-    </div>
-    <script>
-        const wordElement = document.getElementById('word');
-        const textInput = document.getElementById('textInput');
-        let words = [];
-        let index = 0;
-
-        function splitText() {
-            words = textInput.value.split(' ');
-        }
-
-        function displayWord() {
-            if (index < words.length) {
-                const word = words[index];
-                const middleIndex = Math.floor(word.length / 2);
-                const wordHtml = word.slice(0, middleIndex) + 
-                    '<span style="color: red;">' + word[middleIndex] + '</span>' + 
-                    word.slice(middleIndex + 1);
-                wordElement.innerHTML = wordHtml;
-                index++;
-                setTimeout(displayWord, 1000);
-            }
-        }
-
-        function startReading() {
-            splitText();
-            index = 0;
-            displayWord();
-        }
-    </script>
 </body>
 </html>
