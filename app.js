@@ -1,54 +1,142 @@
-// Speed Reading App Logic
+const wordElement = document.getElementById('word');
+const textInput = document.getElementById('textInput');
 
-// Function to parse text
-function parseText(text) {
-    // Splits the text into an array of words
-    return text.split(' ');
+const playBtn = document.getElementById('playBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const resetBtn = document.getElementById('resetBtn');
+const loadBtn = document.getElementById('loadBtn');
+const clearBtn = document.getElementById('clearBtn');
+
+const wpm = document.getElementById('wpm');
+const wpmLabel = document.getElementById('wpmLabel');
+const pos = document.getElementById('pos');
+
+const KEY = "speedreader_v1";
+
+let words = [];
+let index = 0;
+let timer = null;
+let playing = false;
+
+function tokenize(text) {
+  return text.replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
 }
 
-// Function to control playback
-class Playback {
-    constructor(words) {
-        this.words = words;
-        this.currentIndex = 0;
-    }
-    play() {
-        if (this.currentIndex < this.words.length) {
-            console.log(this.words[this.currentIndex]); // Display the word
-            this.currentIndex++;
-            setTimeout(() => this.play(), 300); // Adjust the speed here
-        }
-    }
-    pause() {
-        clearTimeout(this);
-    }
+function renderWord(word) {
+  if (!word) return "";
+  const mid = Math.floor(word.length / 2);
+  return word.slice(0, mid) +
+    '<span class="orp">' + word[mid] + '</span>' +
+    word.slice(mid + 1);
 }
 
-// Function to handle local storage
-function saveProgress(currentIndex) {
-    localStorage.setItem('currentWordIndex', currentIndex);
+function msPerWordFromWpm(wpmVal) {
+  return Math.round(60000 / wpmVal);
 }
 
-function loadProgress() {
-    return localStorage.getItem('currentWordIndex') || 0;
+function updateUI() {
+  const total = words.length;
+  pos.textContent = total ? `${Math.min(index + 1, total)} / ${total}` : `0 / 0`;
+  wordElement.innerHTML = total ? renderWord(words[index] || "") : "Ready";
 }
 
-// Function for word navigation
-function navigateWords(playback, direction) {
-    if (direction === 'next') {
-        playback.currentIndex = Math.min(playback.currentIndex + 1, playback.words.length - 1);
-    } else if (direction === 'previous') {
-        playback.currentIndex = Math.max(playback.currentIndex - 1, 0);
-    }
-    console.log(playback.words[playback.currentIndex]); // Display the current word
+function saveState() {
+  const state = { text: textInput.value, index, wpm: Number(wpm.value) };
+  localStorage.setItem(KEY, JSON.stringify(state));
 }
 
-// Example usage
-const text = "This is an example text for the speed reading app.";
-const words = parseText(text);
-const playback = new Playback(words);
-playback.play();
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(KEY) || "{}"); }
+  catch { return {}; }
+}
 
-// Save and load functionality example
-saveProgress(playback.currentIndex);
-loadProgress();
+function stop() {
+  playing = false;
+  playBtn.textContent = "▶ Start";
+  if (timer) clearTimeout(timer);
+  timer = null;
+  saveState();
+}
+
+function tick() {
+  if (!playing) return;
+
+  if (index < words.length - 1) {
+    index++;
+    updateUI();
+    saveState();
+    timer = setTimeout(tick, msPerWordFromWpm(Number(wpm.value)));
+  } else {
+    stop();
+  }
+}
+
+function start() {
+  if (!words.length) return;
+  if (playing) return;
+  playing = true;
+  playBtn.textContent = "⏸ Pause";
+  updateUI();
+  timer = setTimeout(tick, msPerWordFromWpm(Number(wpm.value)));
+}
+
+// Buttons
+playBtn.addEventListener("click", () => (playing ? stop() : start()));
+
+prevBtn.addEventListener("click", () => {
+  stop();
+  index = Math.max(index - 1, 0);
+  updateUI();
+  saveState();
+});
+
+nextBtn.addEventListener("click", () => {
+  stop();
+  index = Math.min(index + 1, Math.max(words.length - 1, 0));
+  updateUI();
+  saveState();
+});
+
+resetBtn.addEventListener("click", () => {
+  stop();
+  index = 0;
+  updateUI();
+  saveState();
+});
+
+loadBtn.addEventListener("click", () => {
+  stop();
+  words = tokenize(textInput.value);
+  index = 0;
+  updateUI();
+  saveState();
+});
+
+clearBtn.addEventListener("click", () => {
+  stop();
+  textInput.value = "";
+  words = [];
+  index = 0;
+  updateUI();
+  saveState();
+});
+
+wpm.addEventListener("input", () => {
+  wpmLabel.textContent = wpm.value;
+  saveState();
+  if (playing) {
+    stop();
+    start();
+  }
+});
+
+// Init
+const st = loadState();
+textInput.value = st.text || "";
+wpm.value = st.wpm || 300;
+wpmLabel.textContent = wpm.value;
+
+words = tokenize(textInput.value);
+index = Math.min(st.index || 0, Math.max(words.length - 1, 0));
+updateUI();
