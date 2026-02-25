@@ -12,7 +12,7 @@ const wpm = document.getElementById('wpm');
 const wpmLabel = document.getElementById('wpmLabel');
 const pos = document.getElementById('pos');
 
-const KEY = "speedreader_v1";
+const KEY = "speedreader_v2";
 
 let words = [];
 let index = 0;
@@ -20,11 +20,19 @@ let timer = null;
 let playing = false;
 
 function tokenize(text) {
-  return text.replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+  // keep paragraph breaks as a token "\n"
+  return text
+    .replace(/\n+/g, " \n ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean);
 }
 
 function renderWord(word) {
   if (!word) return "";
+  if (word === "\n") return "<span class='small'>—</span>";
+
   const mid = Math.floor(word.length / 2);
   return word.slice(0, mid) +
     '<span class="orp">' + word[mid] + '</span>' +
@@ -59,14 +67,38 @@ function stop() {
   saveState();
 }
 
+function getAdaptiveDelay(word, baseDelay) {
+  let multiplier = 1;
+
+  // paragraph token
+  if (word === "\n") multiplier += 1.2;
+
+  // long words
+  if (word.length >= 8) multiplier += 0.25;
+  if (word.length >= 12) multiplier += 0.15;
+
+  // comma / semicolon
+  if (/[,;:]/.test(word)) multiplier += 0.4;
+
+  // sentence end
+  if (/[.!?]/.test(word)) multiplier += 0.7;
+
+  return Math.round(baseDelay * multiplier);
+}
+
 function tick() {
   if (!playing) return;
 
   if (index < words.length - 1) {
+    const currentWord = words[index];
     index++;
     updateUI();
     saveState();
-    timer = setTimeout(tick, msPerWordFromWpm(Number(wpm.value)));
+
+    const baseDelay = msPerWordFromWpm(Number(wpm.value));
+    const adaptiveDelay = getAdaptiveDelay(currentWord, baseDelay);
+
+    timer = setTimeout(tick, adaptiveDelay);
   } else {
     stop();
   }
@@ -78,7 +110,11 @@ function start() {
   playing = true;
   playBtn.textContent = "⏸ Pause";
   updateUI();
-  timer = setTimeout(tick, msPerWordFromWpm(Number(wpm.value)));
+
+  const baseDelay = msPerWordFromWpm(Number(wpm.value));
+  const firstDelay = getAdaptiveDelay(words[index] || "", baseDelay);
+
+  timer = setTimeout(tick, firstDelay);
 }
 
 // Buttons
